@@ -5,7 +5,7 @@ defmodule HeadsUpWeb.IncidentLive.Index do
   import HeadsUpWeb.CustomComponents
 
   def mount(_params, _session, socket) do
-    socket = assign(socket, :incidents, Incidents.list_incidents())
+    socket = stream(socket, :incidents, Incidents.filter_incidents())
     {:ok, socket}
   end
 
@@ -21,8 +21,12 @@ defmodule HeadsUpWeb.IncidentLive.Index do
           Speak the truth!
         </:taglines>
       </.headline>
-      <div class="incidents">
-        <.incident_card :for={incident <- @incidents} incident={incident} />
+      <div class="incidents" id="incidents" phx-update="stream">
+        <.incident_card
+          :for={{dom_id, incident} <- @streams.incidents}
+          incident={incident}
+          id={dom_id}
+        />
       </div>
     </div>
     """
@@ -33,7 +37,7 @@ defmodule HeadsUpWeb.IncidentLive.Index do
     <.link navigate={~p"/incidents/#{@incident.id}"}>
       <div class="card">
         <img src={@incident.image_path} />
-        <h2>Bear In The Trash</h2>
+        <h2>{@incident.name}</h2>
         <div class="details">
           <.badge status={@incident.status} />
           <div class="priority">
