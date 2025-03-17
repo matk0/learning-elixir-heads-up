@@ -5,13 +5,17 @@ defmodule HeadsUpWeb.IncidentLive.Index do
   import HeadsUpWeb.CustomComponents
 
   def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  def handle_params(params, _uri, socket) do
     socket =
       socket
+      |> stream(:incidents, Incidents.filter_incidents(params))
       |> assign(:page_title, "Incidents")
-      |> assign(:form, to_form(%{}))
-      |> stream(:incidents, Incidents.list_incidents())
+      |> assign(:form, to_form(params))
 
-    {:ok, socket}
+    {:noreply, socket}
   end
 
   def render(assigns) do
@@ -60,6 +64,9 @@ defmodule HeadsUpWeb.IncidentLive.Index do
           "Priority: Low to High": "priority_asc"
         ]}
       />
+      <.link navigate={~p"/incidents"}>
+        Reset
+      </.link>
     </.form>
     """
   end
@@ -86,6 +93,13 @@ defmodule HeadsUpWeb.IncidentLive.Index do
       socket
       |> assign(:form, to_form(params))
       |> stream(:incidents, Incidents.filter_incidents(params), reset: true)
+
+    params =
+      params
+      |> Map.take(~w(q status sort_by))
+      |> Map.reject(fn {_, v} -> v == "" end)
+
+    socket = push_navigate(socket, to: ~p"/incidents?#{params}")
 
     {:noreply, socket}
   end
