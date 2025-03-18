@@ -11,7 +11,7 @@ defmodule HeadsUpWeb.IncidentLive.Index do
   def handle_params(params, _uri, socket) do
     socket =
       socket
-      |> stream(:incidents, Incidents.filter_incidents(params))
+      |> stream(:incidents, Incidents.filter_incidents(params), reset: true)
       |> assign(:page_title, "Incidents")
       |> assign(:form, to_form(params))
 
@@ -64,7 +64,7 @@ defmodule HeadsUpWeb.IncidentLive.Index do
           "Priority: Low to High": "priority_asc"
         ]}
       />
-      <.link navigate={~p"/incidents"}>
+      <.link patch={~p"/incidents"}>
         Reset
       </.link>
     </.form>
@@ -99,7 +99,7 @@ defmodule HeadsUpWeb.IncidentLive.Index do
       |> Map.take(~w(q status sort_by))
       |> Map.reject(fn {_, v} -> v == "" end)
 
-    socket = push_navigate(socket, to: ~p"/incidents?#{params}")
+    socket = push_patch(socket, to: ~p"/incidents?#{params}")
 
     {:noreply, socket}
   end
