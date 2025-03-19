@@ -17,6 +17,10 @@ defmodule HeadsUpWeb.Router do
 
   scope "/", HeadsUpWeb do
     pipe_through :browser
+    live "/categories", CategoryLive.Index, :index
+    live "/categories/new", CategoryLive.Form, :new
+    live "/categories/:id", CategoryLive.Show, :show
+    live "/categories/:id/edit", CategoryLive.Form, :edit
 
     get "/tips", TipController, :index
     get "/tips/:id", TipController, :show
