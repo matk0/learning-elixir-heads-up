@@ -11,6 +11,7 @@ defmodule HeadsUp.Incidents do
   def filter_incidents(filter) do
     Incident
     |> with_status(filter["status"])
+    |> with_category(filter["category"])
     |> where([i], ilike(i.name, ^"%#{filter["q"]}%"))
     |> sort(filter["sort_by"])
     |> preload(:category)
@@ -24,6 +25,14 @@ defmodule HeadsUp.Incidents do
 
   defp with_status(query, _), do: query
 
+  defp with_category(query, slug) when slug in ["", nil], do: query
+
+  defp with_category(query, slug) do
+    from r in query,
+      join: c in assoc(r, :category),
+      where: c.slug == ^slug
+  end
+
   defp sort(query, "name") do
     order_by(query, :name)
   end
@@ -34,6 +43,12 @@ defmodule HeadsUp.Incidents do
 
   defp sort(query, "priority_asc") do
     order_by(query, asc: :priority)
+  end
+
+  defp sort(query, "category") do
+    from r in query,
+      join: c in assoc(r, :category),
+      order_by: c.name
   end
 
   defp sort(query, _) do
