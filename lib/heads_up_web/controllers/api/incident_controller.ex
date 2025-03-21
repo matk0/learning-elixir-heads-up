@@ -20,4 +20,25 @@ defmodule HeadsUpWeb.Api.IncidentController do
       |> put_view(json: HeadsUpWeb.ErrorJSON)
       |> render(:"404")
   end
+
+  def error(%{changeset: changeset}) do
+    errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+
+    %{errors: errors}
+  end
+
+  def create(conn, %{"incident" => incident_params}) do
+    case Admin.create_incident(incident_params) do
+      {:ok, incident} ->
+        conn
+        |> put_status(:created)
+        |> put_resp_header("location", ~p"/api/incidents/#{incident}")
+        |> render(:show, incident: incident)
+
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(:error, changeset: changeset)
+    end
+  end
 end
