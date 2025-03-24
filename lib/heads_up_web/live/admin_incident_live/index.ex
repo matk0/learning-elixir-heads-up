@@ -56,6 +56,9 @@ defmodule HeadsUpWeb.AdminIncidentLive.Index do
             <.icon name="hero-trash" class="h-4 w-4" />
           </.link>
         </:action>
+        <:action :let={{_dom_id, incident}}>
+          <.link phx-click="draw-response" phx-value-id={incident.id}>Draw Hero</.link>
+        </:action>
       </.table>
     </div>
     """
@@ -65,6 +68,23 @@ defmodule HeadsUpWeb.AdminIncidentLive.Index do
     incident = Admin.get_incident!(id)
     {:ok, _} = Admin.delete_incident(incident)
     {:noreply, stream_delete(socket, :incidents, incident)}
+  end
+
+  def handle_event("draw-response", %{"id" => id}, socket) do
+    incident = Admin.get_incident!(id)
+
+    case Admin.draw_heroic_response(incident) do
+      {:ok, incident} ->
+        socket =
+          socket
+          |> put_flash(:info, "Hero response drawn!")
+          |> stream_insert(:incidents, incident)
+
+        {:noreply, socket}
+
+      {:error, error} ->
+        {:noreply, put_flash(socket, :error, error)}
+    end
   end
 
   def delete_and_hide(dom_id, incident) do

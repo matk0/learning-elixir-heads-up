@@ -4,7 +4,6 @@ defmodule HeadsUpWeb.IncidentLive.Show do
   alias HeadsUp.Incidents
   alias HeadsUp.Responses
   alias HeadsUp.Responses.Response
-
   import HeadsUpWeb.CustomComponents
 
   on_mount {HeadsUpWeb.UserAuth, :mount_current_user}
@@ -43,6 +42,14 @@ defmodule HeadsUpWeb.IncidentLive.Show do
     ~H"""
     <div class="incident-show">
       <.back navigate={~p"/incidents"}>Back to incidents</.back>
+      <.headline :if={@incident.heroic_response}>
+        <.icon name="hero-sparkles-solid" />
+        Heroic Responder: {@incident.heroic_response.user.username}
+        <:taglines>
+          {@incident.heroic_response.note}
+        </:taglines>
+      </.headline>
+
       <div class="incident">
         <img src={@incident.image_path} />
         <section>
