@@ -4,6 +4,14 @@ alias HeadsUp.Repo
 import Ecto.Query
 
 defmodule HeadsUp.Incidents do
+  def subscribe(incident_id) do
+    Phoenix.PubSub.subscribe(HeadsUp.PubSub, "incident:#{incident_id}")
+  end
+
+  def broadcast(incident_id, message) do
+    Phoenix.PubSub.broadcast(HeadsUp.PubSub, "incident:#{incident_id}", message)
+  end
+
   def list_incidents do
     Repo.all(Incident)
   end

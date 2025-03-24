@@ -5,6 +5,7 @@ defmodule HeadsUp.Responses do
 
   import Ecto.Query, warn: false
   alias HeadsUp.Repo
+  alias HeadsUp.Incidents
   alias HeadsUp.Incidents.Incident
   alias HeadsUp.Accounts.User
 
@@ -55,6 +56,14 @@ defmodule HeadsUp.Responses do
     %Response{incident: incident, user: user}
     |> Response.changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, response} ->
+        Incidents.broadcast(incident.id, {:response_created, response})
+        {:ok, response}
+
+      {:error, _} = error ->
+        error
+    end
   end
 
   @doc """
